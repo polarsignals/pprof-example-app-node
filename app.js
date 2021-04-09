@@ -4,33 +4,9 @@ const app = express()
 const port = 3000
 
 pprof.heap.start(512 * 1024, 64);
-// pprof.time.start(1000);
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
-})
-
-app.get('/cpu', (req, res) => {
-    const f = fib(123)
-    res.send(`fib(1234) = ${f}`)
-})
-
-const fib = (n) => {
-    if (n <= 1) {
-        return n;
-    }
-    return fib(n - 1) + fib(n - 2)
-}
-
-app.get('/memory', (req, res) => {
-    let arr = Array(1e8).fill("some string");
-    arr.reverse();
-    const used = process.memoryUsage().heapUsed / 1024 / 1024;
-    res.send(`We've used approximately ${used}MiB`)
-})
-
-app.listen(port, () => {
-    console.log(`app listening at http://localhost:${port}`)
 })
 
 app.get('/debug/pprof/heap', (req, res) => {
@@ -38,11 +14,22 @@ app.get('/debug/pprof/heap', (req, res) => {
     pprof.encode(profile)
         .then((buf) => res.send(buf))
         .catch((err) => res.send(err))
-})
-
-app.get('/debug/pprof/profile', (req, res) => {
-    pprof.time.profile(10 * 1000 * 1000)
-        .then((profile) => pprof.encode(profile))
-        .then((buf) => res.send(buf))
-        .catch((err) => res.send(err))
-})
+});
+app.get('/debug/pprof/profile', async (req, res) => {
+    try {
+        const profile = await pprof.time.profile({
+            durationMillis: 10000,    // time in milliseconds for which to
+            // collect profile.
+        });
+        pprof.encode(profile)
+            .then((buf) => res.send(buf))
+            .catch((err) => res.send(err))
+    } catch (e) {
+        res.send('error profiling: ' + e)
+    }
+});
+app.listen(port, () => {
+    console.log(
+        `📈 http application telemetry ready on http://localhost:${port}`,
+    );
+});
