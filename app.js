@@ -5,7 +5,12 @@ const port = 3000
 
 pprof.heap.start(512 * 1024, 64);
 
+const expensiveLoop = () => {
+    for (let i = 0; i < 100000; i++) {}
+}
+
 app.get('/', (req, res) => {
+    expensiveLoop()
     res.send('Hello World!')
 })
 
@@ -18,7 +23,7 @@ app.get('/debug/pprof/heap', (req, res) => {
 app.get('/debug/pprof/profile', async (req, res) => {
     try {
         const profile = await pprof.time.profile({
-            durationMillis: 10000,    // time in milliseconds for which to
+            durationMillis: 1000,    // time in milliseconds for which to
             // collect profile.
         });
         pprof.encode(profile)
