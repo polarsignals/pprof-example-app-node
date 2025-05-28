@@ -14,24 +14,11 @@ app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
-app.get('/debug/pprof/heap', (req, res) => {
+app.get('/debug/pprof/allocs', (req, res) => {
     const profile = pprof.heap.profile()
     pprof.encode(profile)
         .then((buf) => res.send(buf))
         .catch((err) => res.send(err))
-});
-app.get('/debug/pprof/profile', async (req, res) => {
-    try {
-        const profile = await pprof.time.profile({
-            durationMillis: 1000,    // time in milliseconds for which to
-            // collect profile.
-        });
-        pprof.encode(profile)
-            .then((buf) => res.send(buf))
-            .catch((err) => res.send(err))
-    } catch (e) {
-        res.send('error profiling: ' + e)
-    }
 });
 app.listen(port, () => {
     console.log(
