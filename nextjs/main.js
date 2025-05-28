@@ -43,18 +43,9 @@ app.prepare().then(() => {
 
 });
 
-privateServer.get('/debug/pprof/heap', (req, res) => {
+privateServer.get('/debug/pprof/allocs', (req, res) => {
     const profile = pprof.heap.profile()
     pprof.encode(profile)
-        .then((buf) => res.send(buf))
-        .catch((err) => res.send(err))
-});
-privateServer.get('/debug/pprof/profile', async (req, res) => {
-	const profile = await pprof.time.profile({
-	  durationMillis: 10000,    // time in milliseconds for which to
-								// collect profile.
-	});
-	pprof.encode(profile)
         .then((buf) => res.send(buf))
         .catch((err) => res.send(err))
 });
